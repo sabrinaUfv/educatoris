@@ -1,0 +1,122 @@
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+function token() {
+  return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+}
+
+async function req(path, options = {}) {
+  const t = token();
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(t ? { Authorization: `Bearer ${t}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ erro: 'Erro desconhecido' }));
+    throw new Error(body.erro || 'Erro na requisição');
+  }
+
+  return res;
+}
+
+export async function login(email, senha) {
+  return (await req('/auth/login', { method: 'POST', body: JSON.stringify({ email, senha }) })).json();
+}
+
+export async function cadastrar(dados) {
+  return (await req('/auth/cadastro', { method: 'POST', body: JSON.stringify(dados) })).json();
+}
+
+export async function logout() {
+  await req('/auth/logout', { method: 'POST' });
+}
+
+export async function getConteudosPorAno(ano) {
+  return (await req(`/conteudo/ano/${ano}`)).json();
+}
+
+export async function buscarTemas(termo) {
+  return (await req(`/conteudo/buscar?q=${encodeURIComponent(termo)}`)).json();
+}
+
+export async function getLaboratorios() {
+  return (await req('/conteudo/laboratorios')).json();
+}
+
+export async function getMateriaisDoTema(idConteudo) {
+  return (await req(`/materiais/tema/${idConteudo}`)).json();
+}
+
+export async function acessarLaboratorio(id) {
+  return (await req(`/materiais/laboratorio/${id}/acessar`)).json();
+}
+
+export async function downloadPDF(idMaterial, titulo) {
+  const t = token();
+  const res = await fetch(`${BASE}/materiais/${idMaterial}/download`, {
+    headers: { Authorization: `Bearer ${t}` },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ erro: 'Erro no download' }));
+    throw new Error(body.erro);
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${titulo}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function getPlanos() {
+  return (await req('/planos')).json();
+}
+
+export async function getMeuPlano() {
+  return (await req('/planos/meu')).json();
+}
+
+export async function assinarPlano(idPlano) {
+  return (await req('/planos/assinar', { method: 'POST', body: JSON.stringify({ idPlano }) })).json();
+}
+
+// --- Admin ---
+
+export async function getAdminConteudos() {
+  return (await req('/admin/conteudos')).json();
+}
+
+export async function adicionarConteudo(dados) {
+  return (await req('/admin/conteudos', { method: 'POST', body: JSON.stringify(dados) })).json();
+}
+
+export async function inativarConteudo(id) {
+  return (await req(`/admin/conteudos/${id}`, { method: 'DELETE' })).json();
+}
+
+export async function adicionarMaterial(dados) {
+  return (await req('/admin/materiais', { method: 'POST', body: JSON.stringify(dados) })).json();
+}
+
+export async function inativarMaterial(id) {
+  return (await req(`/admin/materiais/${id}`, { method: 'DELETE' })).json();
+}
+
+export async function getAdminProfessores() {
+  return (await req('/admin/professores')).json();
+}
+
+export async function alterarStatusProfessor(id, ativo) {
+  return (await req(`/admin/professores/${id}/status`, { method: 'PATCH', body: JSON.stringify({ ativo }) })).json();
+}
+
+export async function atualizarPrecoPlano(id, preco) {
+  return (await req(`/admin/planos/${id}`, { method: 'PUT', body: JSON.stringify({ preco }) })).json();
+}
