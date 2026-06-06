@@ -12,9 +12,23 @@ exports.acessarLaboratorio = (req, res) => {
   if (!lab) return res.status(404).json({ erro: 'Laboratório não encontrado.' });
   if (lab.tipo !== 'laboratorio') return res.status(400).json({ erro: 'Material não é um laboratório.' });
 
+  // 'remoto' só existe se a linha em laboratorios foi inserida corretamente
+  if (!('remoto' in lab)) {
+    return res.status(500).json({ erro: 'Laboratório mal configurado no banco de dados.' });
+  }
+
   try {
     const material = conteudoService.verificarAcessoMaterial(lab, req.usuario);
-    laboratorioRepository.registrarAcesso(req.usuario.id, lab.id);
+
+    // só professores têm registro em acesso_lab; admins são ignorados aqui
+    if (req.usuario.tipo === 'professor') {
+      try {
+        laboratorioRepository.registrarAcesso(req.usuario.id, lab.id);
+      } catch (e) {
+        console.error('[acesso_lab] erro ao registrar acesso:', e.message);
+      }
+    }
+
     res.json({ url: material.url, titulo: material.titulo });
   } catch (e) {
     res.status(403).json({ erro: e.message });
