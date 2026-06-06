@@ -3,10 +3,10 @@ export default function PlayerVideo({ url }) {
 
   if (youtubeId) {
     return (
-      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, marginBottom: '0.5rem' }}>
+      <div className="relative w-full pt-[56.25%] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
         <iframe
           src={`https://www.youtube.com/embed/${youtubeId}`}
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          className="absolute top-0 left-0 w-full h-full"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -15,7 +15,13 @@ export default function PlayerVideo({ url }) {
     );
   }
 
-  return <video src={url} controls style={{ width: '100%', marginBottom: '0.5rem' }} />;
+  return (
+    <video 
+      src={url} 
+      controls 
+      className="w-full rounded-2xl shadow-xl bg-slate-900"
+    />
+  );
 }
 
 function extrairIdYoutube(url) {

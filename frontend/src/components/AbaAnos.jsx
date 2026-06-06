@@ -1,17 +1,15 @@
 export default function AbaAnos({ anoAtivo, onMudar }) {
   return (
-    <div style={{ display: 'flex', gap: '0.5rem' }}>
+    <div className="flex gap-1">
       {[1, 2, 3].map(ano => (
         <button
           key={ano}
           onClick={() => onMudar(ano)}
-          style={{
-            padding: '0.4rem 0.8rem',
-            fontWeight: anoAtivo === ano ? 'bold' : 'normal',
-            borderBottom: anoAtivo === ano ? '2px solid black' : '2px solid transparent',
-            background: 'none',
-            cursor: 'pointer',
-          }}
+          className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+            anoAtivo === ano
+              ? 'bg-white text-indigo-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+          }`}
         >
           {ano}º Ano
         </button>
