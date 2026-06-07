@@ -25,7 +25,6 @@ export default function AdminProfessores() {
     if (!confirm(`Deseja realmente ${acao} o acesso de ${nome}?`)) return;
 
     try {
-      // Passamos o status inverso para a API (se está ativo, manda false para bloquear)
       await alterarStatusProfessor(id, !isAtivo);
       notificar(`Acesso de ${nome} foi ${isAtivo ? 'bloqueado' : 'liberado'}.`);
       carregar();
@@ -76,8 +75,8 @@ export default function AdminProfessores() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {professores.map(p => {
-                    // Força a conversão do campo ativo do banco (1 ou 0) para booleano
-                    const isAtivo = Boolean(p.ativo); 
+                    // CORREÇÃO: Usando p.status_ativo em vez de p.ativo
+                    const isAtivo = Boolean(p.status_ativo); 
 
                     return (
                       <tr key={p.id} className="hover:bg-slate-50 transition-colors">

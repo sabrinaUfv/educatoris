@@ -72,12 +72,20 @@ class MaterialRepository {
 
   listarTodosConteudos() {
     return db
-      .prepare('SELECT * FROM conteudos WHERE status = 1 ORDER BY ano_escolar, titulo')
+      .prepare('SELECT * FROM conteudos ORDER BY ano_escolar, titulo')
       .all();
   }
 
   inativarConteudo(id) {
     db.prepare('UPDATE conteudos SET status = 0 WHERE id = ?').run(id);
+  }
+
+  alternarStatusConteudo(id, status) {
+    db.prepare('UPDATE conteudos SET status = ? WHERE id = ?').run(status ? 1 : 0, id);
+  }
+
+  deletarDefinitivo(id) {
+    db.prepare('DELETE FROM conteudos WHERE id = ?').run(id);
   }
 
   #enriquecerMaterial(material) {

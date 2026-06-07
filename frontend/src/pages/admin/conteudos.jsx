@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminConteudos, adicionarConteudo, inativarConteudo } from '../../lib/api';
+import { getAdminConteudos, adicionarConteudo, alternarStatusConteudo, deletarConteudo } from '../../lib/api';
 
 const ANOS = [1, 2, 3];
 const formVazio = { titulo: '', anoEscolar: 1, tema: '' };
@@ -35,11 +35,28 @@ export default function AdminConteudos() {
     }
   }
 
-  async function handleInativar(id, titulo) {
-    if (!confirm(`Tem certeza que deseja inativar "${titulo}"?`)) return;
+  async function handleToggleVisibilidade(id, titulo, isVisivel) {
+    const acao = isVisivel ? 'OCULTAR' : 'TORNAR VISÍVEL';
+    const consequencia = isVisivel 
+      ? 'Os alunos não poderão mais ver esta aula.' 
+      : 'Esta aula voltará a aparecer para os alunos.';
+      
+    if (!confirm(`Deseja ${acao} o tema "${titulo}"? ${consequencia}`)) return;
+    
     try {
-      await inativarConteudo(id);
-      notificar('Conteúdo inativado.');
+      await alternarStatusConteudo(id, !isVisivel);
+      notificar(`Conteúdo ${isVisivel ? 'ocultado' : 'visível'} com sucesso.`);
+      carregar();
+    } catch (e) {
+      notificar(e.message, 'erro');
+    }
+  }
+
+  async function handleDeletar(id, titulo) {
+    if (!confirm(`CUIDADO: Tem certeza que deseja DELETAR PERMANENTEMENTE "${titulo}"? Esta ação apagará a aula do banco de dados e não pode ser desfeita.`)) return;
+    try {
+      await deletarConteudo(id);
+      notificar('Conteúdo excluído permanentemente.');
       carregar();
     } catch (e) {
       notificar(e.message, 'erro');
@@ -95,32 +112,74 @@ export default function AdminConteudos() {
                   <tr>
                     <th className="p-4 font-bold uppercase tracking-wider">Título da Aula</th>
                     <th className="p-4 font-bold uppercase tracking-wider">Tema / Área</th>
-                    <th className="p-4 font-bold uppercase tracking-wider text-center w-28">Ações</th>
+                    <th className="p-4 font-bold uppercase tracking-wider text-center">Status</th>
+                    <th className="p-4 font-bold uppercase tracking-wider text-center w-56">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filtrados.map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4 font-bold text-slate-800">{c.titulo}</td>
-                      <td className="p-4">
-                        <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold uppercase tracking-wide">
-                          {c.tema}
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <button 
-                          onClick={() => handleInativar(c.id, c.titulo)}
-                          className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors inline-flex items-center gap-1"
-                          title="Inativar Tema"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Ocultar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filtrados.map(c => {
+                    const isVisivel = c.status === 1;
+
+                    return (
+                      <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                        <td className={`p-4 font-bold ${isVisivel ? 'text-slate-800' : 'text-slate-400'}`}>
+                          {c.titulo}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide ${isVisivel ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                            {c.tema}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 border rounded-lg text-xs font-bold uppercase tracking-wide ${
+                            isVisivel ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isVisivel ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                            {isVisivel ? 'Visível' : 'Oculto'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {isVisivel ? (
+                              <button 
+                                onClick={() => handleToggleVisibilidade(c.id, c.titulo, isVisivel)}
+                                className="px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors inline-flex items-center gap-1 w-24 justify-center"
+                                title="Ocultar Tema"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                                Ocultar
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => handleToggleVisibilidade(c.id, c.titulo, isVisivel)}
+                                className="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors inline-flex items-center gap-1 w-24 justify-center"
+                                title="Tornar Visível"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Mostrar
+                              </button>
+                            )}
+
+                            <button 
+                              onClick={() => handleDeletar(c.id, c.titulo)}
+                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors inline-flex items-center gap-1"
+                              title="Excluir Permanentemente"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Excluir
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

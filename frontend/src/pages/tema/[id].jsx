@@ -8,17 +8,23 @@ import { getMateriaisDoTema, downloadPDF, acessarLaboratorio } from '../../lib/a
 export default function TemaPage() {
   const router = useRouter();
   const { id } = router.query;
+  
+  // O estado 'carregando' deve ficar AQUI DENTRO, junto com os outros
   const [materiais, setMateriais] = useState([]);
   const [videoAtivo, setVideoAtivo] = useState(null);
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     if (!localStorage.getItem('token')) { router.push('/login'); return; }
+    
+    setCarregando(true);
     getMateriaisDoTema(id)
       .then(setMateriais)
-      .catch(e => setErro(e.message));
+      .catch(e => setErro(e.message))
+      .finally(() => setCarregando(false));
   }, [id]);
 
   async function handleDownload(material) {
@@ -156,13 +162,15 @@ export default function TemaPage() {
             </section>
           )}
 
-          {materiais.length === 0 && !erro && (
+          {carregando && !erro && (
             <div className="text-center py-16">
-              <svg className="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
               <p className="text-slate-500 font-medium">Carregando materiais...</p>
+            </div>
+          )}
+
+          {!carregando && materiais.length === 0 && !erro && (
+            <div className="text-center py-16">
+              <p className="text-slate-500 font-medium">Nenhum material disponível neste tema.</p>
             </div>
           )}
         </div>

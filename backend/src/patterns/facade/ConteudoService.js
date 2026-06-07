@@ -19,7 +19,16 @@ class ConteudoService {
   }
 
   buscarTemas(termo) {
-    return this.#materialRepository.filtrarTemas(termo);
+    // Busca todos os conteúdos e faz a filtragem inteligente em memória para ignorar acentos e maiúsculas
+    const todos = this.#materialRepository.listarTodosConteudos();
+    const termoLimpo = termo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    return todos.filter(c => {
+      const tituloLimpo = (c.titulo || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const temaLimpo = (c.tema || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      
+      return tituloLimpo.includes(termoLimpo) || temaLimpo.includes(termoLimpo);
+    });
   }
 
   obterMateriaisDoTema(idConteudo) {

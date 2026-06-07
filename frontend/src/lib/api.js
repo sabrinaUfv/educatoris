@@ -16,13 +16,20 @@ async function req(path, options = {}) {
   });
 
   if (!res.ok) {
+    // CORREÇÃO: Intercepta o 401 e 403 e expulsa o usuário na hora
+    if (res.status === 401 || res.status === 403) {
+      if (typeof window !== 'undefined') {
+        localStorage.clear(); // Limpa os dados
+        window.location.href = '/login'; // Força o redirecionamento imediato
+      }
+    }
+
     const body = await res.json().catch(() => ({ erro: 'Erro desconhecido' }));
     throw new Error(body.erro || 'Erro na requisição');
   }
 
   return res;
 }
-
 export async function login(email, senha) {
   return (await req('/auth/login', { method: 'POST', body: JSON.stringify({ email, senha }) })).json();
 }
@@ -119,4 +126,12 @@ export async function alterarStatusProfessor(id, ativo) {
 
 export async function atualizarPrecoPlano(id, preco) {
   return (await req(`/admin/planos/${id}`, { method: 'PUT', body: JSON.stringify({ preco }) })).json();
+}
+
+export async function deletarConteudo(id) {
+  return (await req(`/admin/conteudos/${id}/deletar`, { method: 'DELETE' })).json();
+}
+
+export async function alternarStatusConteudo(id, status) {
+  return (await req(`/admin/conteudos/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) })).json();
 }
