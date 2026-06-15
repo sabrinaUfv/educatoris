@@ -158,6 +158,76 @@ Acesse `http://localhost:3000` no navegador.
 
 ---
 
+## Testes Automatizados
+
+### Testes Unitários (Backend - Jest)
+
+```bash
+cd backend
+npm test              # Roda todos os 22 testes
+npm run test:watch    # Watch mode
+npm run test:coverage # Relatório de cobertura
+```
+
+✅ **22 testes implementados:**
+- PlanoRepository (5 testes)
+- MaterialRepository (6 testes)
+- AuthService (8 testes)
+- ControladorAutenticacao (3 testes)
+
+Veja [backend/TESTING.md](backend/TESTING.md) para detalhes.
+
+### Testes de Aceitação (Frontend - Cypress)
+
+```bash
+cd frontend
+npm run e2e           # Cypress UI (interativo)
+npm run e2e:run       # Cypress headless (CI/CD)
+```
+
+✅ **5 suítes E2E implementadas:**
+1. Autenticação (login, logout)
+2. Navegação de conteúdos (busca com acentuação)
+3. Gerenciamento de planos (admin)
+4. Gerenciamento de materiais (admin)
+5. Download de PDF com criptografia
+
+Veja [frontend/E2E_TESTS.md](frontend/E2E_TESTS.md) para detalhes.
+
+---
+
+## Funcionalidades Implementadas
+
+### ✅ PDF com Senha (CPF)
+- PDFs gerados são criptografados com AES-256
+- Senha = CPF do usuário (sem caracteres especiais)
+- Padrão Decorator: `PDFComSenha.js`
+- Testes em `PDFComSenha.test.js`
+
+### ✅ Admin sem Limite de Dispositivos
+- Admin pode ter > 3 sessões simultâneas
+- Professor limitado a 3 dispositivos (descartando sessões antigas)
+- Testes em `AuthService.test.js` e `ControladorAutenticacao.test.js`
+
+### ✅ Sessões com TTL (24 horas)
+- Sessões expiram após 24 horas
+- Validação com timestamp + flag de status
+- JWT também com 24h de expiração
+
+### ✅ Busca com Normalização de Acentos
+- Busca "acido" encontra "ácido"
+- Implementado em `ConteudoService`
+
+---
+
+## Documentação
+
+- **[GUIDE.md](GUIDE.md)** — Guia completo de setup, execução e troubleshooting
+- **[backend/TESTING.md](backend/TESTING.md)** — Detalhes dos testes unitários
+- **[frontend/E2E_TESTS.md](frontend/E2E_TESTS.md)** — Detalhes dos testes E2E
+
+---
+
 ## Padrões de projeto implementados
 
 | Padrão | Arquivo |
