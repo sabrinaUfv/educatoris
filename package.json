@@ -1,0 +1,31 @@
+{
+  "name": "educatoris",
+  "version": "1.0.0",
+  "description": "Plataforma educacional e-ducatoris",
+  "private": true,
+  "scripts": {
+    "install:all": "yarn && cd backend && yarn && cd ../frontend && yarn",
+    "install:backend": "cd backend && yarn",
+    "install:frontend": "cd frontend && yarn",
+    "seed": "cd backend && yarn seed",
+    "dev": "yarn concurrently \"cd backend && yarn dev\" \"cd frontend && yarn dev\" --names backend,frontend --prefix name --kill-others-on-exit",
+    "dev:backend": "cd backend && yarn dev",
+    "dev:frontend": "cd frontend && yarn dev",
+    "build": "cd frontend && yarn build",
+    "start": "cd backend && yarn start",
+    "test": "cd backend && yarn test",
+    "test:watch": "cd backend && yarn test:watch",
+    "test:coverage": "cd backend && yarn test:coverage",
+    "e2e": "cd frontend && yarn e2e",
+    "e2e:run": "cd frontend && yarn e2e:run",
+    "e2e:headless": "cd frontend && yarn e2e:headless"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cypress": "^15.17.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}

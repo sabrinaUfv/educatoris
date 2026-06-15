@@ -8,12 +8,17 @@ Projeto acadêmico — INF221 Engenharia de Software I, UFV.
 ## Pré-requisitos
 
 - [Node.js](https://nodejs.org/) v18 ou superior
-- npm (já incluído com o Node.js)
+- [Yarn](https://yarnpkg.com/) v4.0+ (recomendado) ou npm
 
 Verifique sua versão:
 ```bash
 node -v   # deve ser >= 18
-npm -v
+yarn -v   # ou npm -v
+```
+
+Se não tiver yarn:
+```bash
+npm install -g yarn
 ```
 
 ---
@@ -114,21 +119,36 @@ O frontend ficará disponível em `http://localhost:3000`.
 
 ## Rodando os dois juntos
 
+### Com Yarn (Recomendado)
+```bash
+yarn install:all   # Instala tudo
+yarn seed          # Popula banco de dados
+yarn dev           # Backend + Frontend simultaneamente
+```
+
+Acesse `http://localhost:3000` no navegador.
+
+### Com npm (Legado)
 Abra dois terminais:
 
 **Terminal 1 — Backend:**
 ```bash
 cd backend
+npm install
+npm run seed
 npm run dev
 ```
 
 **Terminal 2 — Frontend:**
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
 Acesse `http://localhost:3000` no navegador.
+
+→ **[Ver YARN_GUIDE.md](YARN_GUIDE.md) para instruções detalhadas com yarn**
 
 ---
 

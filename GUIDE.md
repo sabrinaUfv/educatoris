@@ -1,6 +1,33 @@
 # e-ducatoris - Guia de Configuração e Execução
 
-## 📋 Sumário Rápido
+## 📋 Sumário Rápido (com Yarn)
+
+```bash
+# Instalar tudo
+yarn install:all
+
+# Rodar backend + frontend juntos (RECOMENDADO)
+yarn dev
+
+# Ou rodar separadamente
+# Terminal 1
+yarn dev:backend
+
+# Terminal 2
+yarn dev:frontend
+
+# Testes
+yarn test              # Unitários
+yarn test:watch        # Watch mode
+yarn test:coverage     # Com cobertura
+yarn e2e:run          # E2E headless (requer yarn dev rodando)
+```
+
+**→ [Ver YARN_GUIDE.md](YARN_GUIDE.md) para guia completo com yarn**
+
+---
+
+## Equivalente com npm (legado)
 
 ```bash
 # Backend
