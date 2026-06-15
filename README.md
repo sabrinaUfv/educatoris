@@ -5,6 +5,27 @@ Projeto acadêmico — INF221 Engenharia de Software I, UFV.
 
 ---
 
+## ⚡ Setup em 30 segundos
+
+### Linux/macOS
+```bash
+bash setup.sh
+```
+
+### Windows
+```cmd
+setup.bat
+```
+
+**Depois:**
+```bash
+yarn dev
+```
+
+→ **[Ver SETUP.md](SETUP.md) para detalhes do setup automático**
+
+---
+
 ## Pré-requisitos
 
 - [Node.js](https://nodejs.org/) v18 ou superior
@@ -23,13 +44,20 @@ npm install -g yarn
 
 ---
 
-## Estrutura do projeto
+## Estrutura do Projeto
 
 ```
 educatoris/
-├── backend/    Node.js + Express + SQLite
-└── frontend/   Next.js 14
+├── backend/              Node.js + Express + SQLite
+├── frontend/             Next.js 14 + React + Tailwind
+├── setup.sh / setup.bat  Scripts de setup automático
+├── SETUP.md              Guia de setup
+├── YARN_GUIDE.md         Referência de comandos yarn
+├── GUIDE.md              Guia completo
+└── README.md             Este arquivo
 ```
+
+**Stack:** Node.js + Express | Next.js 14 | SQLite | Jest | Cypress | Yarn Workspaces
 
 ---
 
