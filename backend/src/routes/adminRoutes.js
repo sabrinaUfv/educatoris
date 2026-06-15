@@ -17,6 +17,7 @@ router.delete('/conteudos/:id/deletar', ctrl.deletarConteudo);
 router.patch('/conteudos/:id/status', ctrl.alternarStatusConteudo);
 
 router.post('/materiais', ctrl.adicionarMaterial);
+router.put('/materiais/:id', ctrl.editarMaterial);
 router.delete('/materiais/:id', ctrl.inativarMaterial);
 
 module.exports = router;

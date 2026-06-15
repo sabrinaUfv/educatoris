@@ -65,6 +65,14 @@ exports.adicionarMaterial = (req, res) => {
   res.status(201).json({ mensagem: 'Material adicionado.', id });
 };
 
+exports.editarMaterial = (req, res) => {
+  const { titulo, descricao, url } = req.body;
+  if (!titulo || !url) return res.status(400).json({ erro: 'Campos obrigatórios: titulo, url.' });
+
+  materialRepository.atualizarMaterial(parseInt(req.params.id), { titulo, descricao, url });
+  res.json({ mensagem: 'Material atualizado com sucesso.' });
+};
+
 exports.inativarMaterial = (req, res) => {
   materialRepository.inativar(parseInt(req.params.id));
   res.json({ mensagem: 'Material inativado (soft delete).' });

@@ -112,6 +112,10 @@ export async function adicionarMaterial(dados) {
   return (await req('/admin/materiais', { method: 'POST', body: JSON.stringify(dados) })).json();
 }
 
+export async function editarMaterial(id, dados) {
+  return (await req(`/admin/materiais/${id}`, { method: 'PUT', body: JSON.stringify(dados) })).json();
+}
+
 export async function inativarMaterial(id) {
   return (await req(`/admin/materiais/${id}`, { method: 'DELETE' })).json();
 }

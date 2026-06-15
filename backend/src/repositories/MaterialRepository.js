@@ -64,6 +64,12 @@ class MaterialRepository {
     db.prepare('INSERT INTO laboratorios (id, remoto) VALUES (?, ?)').run(id, remoto ? 1 : 0);
   }
 
+  atualizarMaterial(id, { titulo, descricao, url }) {
+    db.prepare(
+      'UPDATE materiais SET titulo = ?, descricao = ?, url = ?, data_modificacao = CURRENT_TIMESTAMP WHERE id = ?'
+    ).run(titulo, descricao || null, url, id);
+  }
+
   inativar(id) {
     db.prepare(
       'UPDATE materiais SET status = 0, data_modificacao = CURRENT_TIMESTAMP WHERE id = ?'

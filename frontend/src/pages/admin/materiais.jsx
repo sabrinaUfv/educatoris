@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminConteudos, getMateriaisDoTema, adicionarMaterial, inativarMaterial } from '../../lib/api';
+import { getAdminConteudos, getMateriaisDoTema, adicionarMaterial, editarMaterial, inativarMaterial } from '../../lib/api';
 
 const TIPOS = [
   { value: 'arquivo',    label: 'Arquivo (PDF)'   },
@@ -16,6 +16,7 @@ export default function AdminMateriais() {
   const [materiais, setMateriais] = useState([]);
   const [form, setForm] = useState(formVazio);
   const [msg, setMsg] = useState({ texto: '', tipo: '' });
+  const [editando, setEditando] = useState(null);
 
   useEffect(() => {
     getAdminConteudos().then(setConteudos).catch(() => {});
@@ -38,6 +39,22 @@ export default function AdminMateriais() {
       await adicionarMaterial({ ...form, conteudoId: parseInt(conteudoSel) });
       notificar('Material adicionado com sucesso.');
       setForm(formVazio);
+      getMateriaisDoTema(conteudoSel).then(setMateriais);
+    } catch (e) {
+      notificar(e.message, 'erro');
+    }
+  }
+
+  async function handleEditar(e) {
+    e.preventDefault();
+    try {
+      await editarMaterial(editando.id, {
+        titulo: editando.titulo,
+        descricao: editando.descricao,
+        url: editando.url,
+      });
+      notificar('Material atualizado com sucesso.');
+      setEditando(null);
       getMateriaisDoTema(conteudoSel).then(setMateriais);
     } catch (e) {
       notificar(e.message, 'erro');
@@ -126,7 +143,7 @@ export default function AdminMateriais() {
                       <th className="p-4 font-bold uppercase tracking-wider">Título</th>
                       <th className="p-4 font-bold uppercase tracking-wider text-center">Tipo</th>
                       <th className="p-4 font-bold uppercase tracking-wider">Link / URL</th>
-                      <th className="p-4 font-bold uppercase tracking-wider text-center w-28">Ações</th>
+                      <th className="p-4 font-bold uppercase tracking-wider text-center w-44">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -146,13 +163,22 @@ export default function AdminMateriais() {
                           </div>
                         </td>
                         <td className="p-4 text-center">
-                          <button 
-                            onClick={() => handleInativar(m.id, m.titulo)}
-                            className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors inline-flex items-center gap-1"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            Ocultar
-                          </button>
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setEditando({ id: m.id, titulo: m.titulo, descricao: m.descricao || '', url: m.url })}
+                              className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors inline-flex items-center gap-1"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleInativar(m.id, m.titulo)}
+                              className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors inline-flex items-center gap-1"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              Ocultar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -320,6 +346,64 @@ export default function AdminMateriais() {
         </div>
 
       </div>
+
+      {/* Modal de Edição */}
+      {editando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Editar Material</h2>
+              <button onClick={() => setEditando(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleEditar} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Título</label>
+                <input
+                  value={editando.titulo}
+                  onChange={e => setEditando(ed => ({ ...ed, titulo: e.target.value }))}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Descrição (opcional)</label>
+                <input
+                  value={editando.descricao}
+                  onChange={e => setEditando(ed => ({ ...ed, descricao: e.target.value }))}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">URL</label>
+                <input
+                  type="url"
+                  value={editando.url}
+                  onChange={e => setEditando(ed => ({ ...ed, url: e.target.value }))}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors"
+                >
+                  Salvar alterações
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditando(null)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
