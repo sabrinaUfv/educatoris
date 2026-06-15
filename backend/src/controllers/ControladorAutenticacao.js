@@ -16,7 +16,7 @@ exports.login = (req, res) => {
     return res.status(403).json({ erro: 'Conta bloqueada. Entre em contato com o suporte.' });
   }
 
-  if (!authService.verificarLimiteDispositivos(usuario.id)) {
+  if (usuario.tipo !== 'administrador' && !authService.verificarLimiteDispositivos(usuario.id)) {
     return res.status(403).json({
       erro: 'Limite de dispositivos simultâneos atingido.',
       codigo: 'LIMITE_DISPOSITIVOS',

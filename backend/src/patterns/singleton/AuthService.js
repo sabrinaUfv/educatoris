@@ -4,6 +4,7 @@ const db = require('../../config/database');
 
 const MAX_DISPOSITIVOS = 3;
 const JWT_EXPIRACAO = '24h';
+const SESSAO_TTL_HORAS = 24;
 
 class AuthService {
   static #instancia = null;
@@ -33,7 +34,15 @@ class AuthService {
     }
   }
 
+  #expirarSessoesAntigas() {
+    db.prepare(
+      `UPDATE sessoes SET ativo = 0, finalizado_em = CURRENT_TIMESTAMP
+       WHERE ativo = 1 AND datetime(criado_em, '+${SESSAO_TTL_HORAS} hours') <= datetime('now')`
+    ).run();
+  }
+
   verificarLimiteDispositivos(idUsuario) {
+    this.#expirarSessoesAntigas();
     const resultado = db
       .prepare('SELECT COUNT(*) AS total FROM sessoes WHERE id_usuario = ? AND ativo = 1')
       .get(idUsuario);
@@ -60,7 +69,10 @@ class AuthService {
 
   sessaoAtiva(token) {
     const sessao = db
-      .prepare('SELECT id FROM sessoes WHERE token = ? AND ativo = 1')
+      .prepare(
+        `SELECT id FROM sessoes WHERE token = ? AND ativo = 1
+         AND datetime(criado_em, '+${SESSAO_TTL_HORAS} hours') > datetime('now')`
+      )
       .get(token);
     return !!sessao;
   }
