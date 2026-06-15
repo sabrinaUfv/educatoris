@@ -7,7 +7,10 @@ router.use(auth, admin);
 
 router.get('/professores', ctrl.listarProfessores);
 router.patch('/professores/:id/status', ctrl.alterarStatus);
+router.get('/planos', ctrl.listarPlanosAdmin);
+router.post('/planos', ctrl.criarPlano);
 router.put('/planos/:id', ctrl.atualizarPlano);
+router.delete('/planos/:id', ctrl.deletarPlano);
 router.get('/conteudos', ctrl.listarConteudos);
 router.post('/conteudos', ctrl.adicionarConteudo);
 router.delete('/conteudos/:id', ctrl.inativarConteudo);

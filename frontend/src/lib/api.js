@@ -128,6 +128,22 @@ export async function alterarStatusProfessor(id, ativo) {
   return (await req(`/admin/professores/${id}/status`, { method: 'PATCH', body: JSON.stringify({ ativo }) })).json();
 }
 
+export async function getAdminPlanos() {
+  return (await req('/admin/planos')).json();
+}
+
+export async function criarPlano(dados) {
+  return (await req('/admin/planos', { method: 'POST', body: JSON.stringify(dados) })).json();
+}
+
+export async function atualizarPlano(id, dados) {
+  return (await req(`/admin/planos/${id}`, { method: 'PUT', body: JSON.stringify(dados) })).json();
+}
+
+export async function deletarPlano(id) {
+  return (await req(`/admin/planos/${id}`, { method: 'DELETE' })).json();
+}
+
 export async function atualizarPrecoPlano(id, preco) {
   return (await req(`/admin/planos/${id}`, { method: 'PUT', body: JSON.stringify({ preco }) })).json();
 }

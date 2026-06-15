@@ -23,12 +23,31 @@ exports.alterarStatus = (req, res) => {
   res.json({ mensagem: `Usuário ${ativo ? 'desbloqueado' : 'bloqueado'} com sucesso.` });
 };
 
-exports.atualizarPlano = (req, res) => {
-  const { preco } = req.body;
-  if (preco === undefined || preco < 0) return res.status(400).json({ erro: 'Preço inválido.' });
+exports.listarPlanosAdmin = (_req, res) => {
+  res.json(planoRepository.listarTodos());
+};
 
-  planoRepository.atualizarPreco(parseInt(req.params.id), preco);
+exports.criarPlano = (req, res) => {
+  const { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download } = req.body;
+  if (!titulo || preco === undefined || preco < 0 || !nivel) {
+    return res.status(400).json({ erro: 'Campos obrigatórios: titulo, preco, nivel.' });
+  }
+  const id = planoRepository.criar({ titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download });
+  res.status(201).json({ mensagem: 'Plano criado com sucesso.', id });
+};
+
+exports.atualizarPlano = (req, res) => {
+  const { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download } = req.body;
+  if (!titulo || preco === undefined || preco < 0 || !nivel) {
+    return res.status(400).json({ erro: 'Campos obrigatórios: titulo, preco, nivel.' });
+  }
+  planoRepository.atualizar(parseInt(req.params.id), { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download });
   res.json({ mensagem: 'Plano atualizado com sucesso.' });
+};
+
+exports.deletarPlano = (req, res) => {
+  planoRepository.deletar(parseInt(req.params.id));
+  res.json({ mensagem: 'Plano desativado com sucesso.' });
 };
 
 exports.adicionarConteudo = (req, res) => {

@@ -36,8 +36,39 @@ class PlanoRepository {
     return result.lastInsertRowid;
   }
 
+  listarTodos() {
+    return db.prepare('SELECT * FROM planos ORDER BY nivel').all();
+  }
+
+  criar({ titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download }) {
+    return db
+      .prepare(
+        `INSERT INTO planos (titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download, ativo)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
+      )
+      .run(titulo, descricao || null, preco, nivel,
+        acesso_video ? 1 : 0, acesso_lab_rem ? 1 : 0, acesso_lab_virt ? 1 : 0,
+        acesso_cont_edit ? 1 : 0, acesso_cont_download ? 1 : 0
+      ).lastInsertRowid;
+  }
+
+  atualizar(id, { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download }) {
+    db.prepare(
+      `UPDATE planos SET titulo = ?, descricao = ?, preco = ?, nivel = ?,
+       acesso_video = ?, acesso_lab_rem = ?, acesso_lab_virt = ?,
+       acesso_cont_edit = ?, acesso_cont_download = ? WHERE id = ?`
+    ).run(titulo, descricao || null, preco, nivel,
+      acesso_video ? 1 : 0, acesso_lab_rem ? 1 : 0, acesso_lab_virt ? 1 : 0,
+      acesso_cont_edit ? 1 : 0, acesso_cont_download ? 1 : 0, id
+    );
+  }
+
   atualizarPreco(id, preco) {
     db.prepare('UPDATE planos SET preco = ? WHERE id = ?').run(preco, id);
+  }
+
+  deletar(id) {
+    db.prepare('UPDATE planos SET ativo = 0 WHERE id = ?').run(id);
   }
 }
 
