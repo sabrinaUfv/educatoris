@@ -318,7 +318,6 @@ Veja [frontend/E2E_TESTS.md](frontend/E2E_TESTS.md) para detalhes.
 
 ## Documentação
 
-- **[YARN_GUIDE.md](YARN_GUIDE.md)** — Referência completa de comandos yarn, workspaces e troubleshooting
 - **[GUIDE.md](GUIDE.md)** — Guia completo de setup, execução e troubleshooting
 - **[backend/TESTING.md](backend/TESTING.md)** — Detalhes dos testes unitários
 - **[frontend/E2E_TESTS.md](frontend/E2E_TESTS.md)** — Detalhes dos testes E2E
