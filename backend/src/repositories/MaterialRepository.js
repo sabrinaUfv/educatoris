@@ -91,7 +91,23 @@ class MaterialRepository {
   }
 
   deletarDefinitivo(id) {
-    db.prepare('DELETE FROM conteudos WHERE id = ?').run(id);
+    // foreign_keys = ON: é preciso apagar os dependentes antes do conteúdo.
+    // conteudos <- materiais <- (arquivos|videoaulas|laboratorios) <- acesso_lab
+    const apagar = db.transaction((conteudoId) => {
+      const materiais = db.prepare('SELECT id FROM materiais WHERE conteudo_id = ?').all(conteudoId);
+
+      for (const { id: matId } of materiais) {
+        db.prepare('DELETE FROM acesso_lab WHERE lab_id = ?').run(matId);
+        db.prepare('DELETE FROM arquivos WHERE id = ?').run(matId);
+        db.prepare('DELETE FROM videoaulas WHERE id = ?').run(matId);
+        db.prepare('DELETE FROM laboratorios WHERE id = ?').run(matId);
+      }
+
+      db.prepare('DELETE FROM materiais WHERE conteudo_id = ?').run(conteudoId);
+      db.prepare('DELETE FROM conteudos WHERE id = ?').run(conteudoId);
+    });
+
+    apagar(id);
   }
 
   #enriquecerMaterial(material) {

@@ -13,6 +13,16 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
 db.exec(schema);
 
+// Migração leve: bancos criados antes das reservas de laboratório não têm as
+// colunas data_inicio/data_fim (CREATE TABLE IF NOT EXISTS não as adiciona).
+const colunasAcessoLab = db.prepare("PRAGMA table_info(acesso_lab)").all().map(c => c.name);
+if (!colunasAcessoLab.includes('data_inicio')) {
+  db.exec('ALTER TABLE acesso_lab ADD COLUMN data_inicio DATETIME');
+}
+if (!colunasAcessoLab.includes('data_fim')) {
+  db.exec('ALTER TABLE acesso_lab ADD COLUMN data_fim DATETIME');
+}
+
 // Garante que sempre existe pelo menos um administrador no sistema
 const adminExiste = db
   .prepare("SELECT id FROM usuarios WHERE tipo = 'administrador' AND status_ativo = 1 LIMIT 1")

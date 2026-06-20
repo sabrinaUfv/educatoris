@@ -3,14 +3,20 @@ const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 function seed() {
-  const inserirPlano = db.prepare(
-    `INSERT OR IGNORE INTO planos (titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, 1)`
-  );
+  // Não usa INSERT OR IGNORE: a tabela planos não tem UNIQUE no título, então
+  // rodar o seed novamente duplicaria os planos. Inserimos só o que ainda não existe.
+  const planoExiste = db.prepare('SELECT id FROM planos WHERE LOWER(titulo) = LOWER(?)');
+  const inserirPlano = (titulo, descricao, preco, nivel, video, labRem, labVirt, contEdit) => {
+    if (planoExiste.get(titulo)) return;
+    db.prepare(
+      `INSERT INTO planos (titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`
+    ).run(titulo, descricao, preco, nivel, video, labRem, labVirt, contEdit);
+  };
 
-  inserirPlano.run('Básico',        'Aulas prontas e exercícios.',                  29.90, 1, 0, 0, 0);
-  inserirPlano.run('Intermediário', 'Básico + Laboratórios Virtuais.',              49.90, 2, 0, 1, 1);
-  inserirPlano.run('Avançado',      'Intermediário + Laboratórios Remotos.',        79.90, 3, 1, 1, 1);
+  inserirPlano('Básico',        'Aulas prontas e exercícios.',                  29.90, 1, 1, 0, 0, 0);
+  inserirPlano('Intermediário', 'Básico + Laboratórios Virtuais.',              49.90, 2, 1, 0, 1, 1);
+  inserirPlano('Avançado',      'Intermediário + Laboratórios Remotos.',        79.90, 3, 1, 1, 1, 1);
 
   // Admin padrão
   if (!db.prepare("SELECT id FROM usuarios WHERE email = 'admin@educatoris.com'").get()) {

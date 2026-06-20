@@ -3,7 +3,10 @@ import { useRouter } from 'next/router';
 import NavBar from '../../components/NavBar';
 import CardMaterial from '../../components/CardMaterial';
 import PlayerVideo from '../../components/PlayerVideo';
-import { getMateriaisDoTema, downloadPDF, acessarLaboratorio } from '../../lib/api';
+import ReservaLabModal from '../../components/ReservaLabModal';
+import LabSessionModal from '../../components/LabSessionModal';
+import Toast from '../../components/Toast';
+import { getMateriaisDoTema, downloadPDF, acessarLaboratorio, iniciarUsoLaboratorio } from '../../lib/api';
 
 export default function TemaPage() {
   const router = useRouter();
@@ -15,6 +18,9 @@ export default function TemaPage() {
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
   const [carregando, setCarregando] = useState(true);
+  const [labReserva, setLabReserva] = useState(null);
+  const [labSessao, setLabSessao] = useState(null);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -38,14 +44,29 @@ export default function TemaPage() {
     }
   }
 
-  async function handleLab(material) {
+  async function abrirLab(material) {
     setErro('');
+    // Lab remoto é recurso limitado: abre o painel de disponibilidade/reserva.
+    if (material.remoto) {
+      setLabReserva(material);
+      return;
+    }
+    // Lab virtual: acesso direto, sem ocupação.
     try {
       const dados = await acessarLaboratorio(material.id);
       window.open(dados.url, '_blank', 'noopener');
     } catch (e) {
-      setErro(e.message);
+      setToast({ texto: e.message, tipo: 'erro' });
     }
+  }
+
+  // Inicia o uso ao vivo do lab remoto e abre o modal de sessão (iframe).
+  // Lança em caso de erro para o ReservaLabModal exibir a notificação.
+  async function handleIniciarUso() {
+    const material = labReserva;
+    const dados = await iniciarUsoLaboratorio(material.id);
+    setLabSessao({ material, url: dados.url });
+    setLabReserva(null);
   }
 
   const videos = materiais.filter(m => m.tipo === 'videoaula');
@@ -154,8 +175,8 @@ export default function TemaPage() {
                   <CardMaterial
                     key={l.id}
                     material={l}
-                    labelAcao={l.remoto ? 'Acessar Lab Remoto' : 'Acessar Lab Virtual'}
-                    onAcao={() => handleLab(l)}
+                    labelAcao={l.remoto ? 'Reservar / Acessar Lab Remoto' : 'Acessar Lab Virtual'}
+                    onAcao={() => abrirLab(l)}
                   />
                 ))}
               </div>
@@ -176,6 +197,28 @@ export default function TemaPage() {
         </div>
 
       </main>
+
+      {labReserva && (
+        <ReservaLabModal
+          material={labReserva}
+          onIniciarUso={handleIniciarUso}
+          onFechar={() => setLabReserva(null)}
+        />
+      )}
+
+      {labSessao && (
+        <LabSessionModal
+          material={labSessao.material}
+          url={labSessao.url}
+          onEncerrar={() => setLabSessao(null)}
+          onExpirar={() => {
+            setLabSessao(null);
+            setToast({ texto: 'Sua sessão no laboratório foi encerrada por inatividade.', tipo: 'aviso' });
+          }}
+        />
+      )}
+
+      <Toast texto={toast?.texto} tipo={toast?.tipo} onFechar={() => setToast(null)} />
     </div>
   );
 }

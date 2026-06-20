@@ -9,6 +9,10 @@ class PlanoRepository {
     return db.prepare('SELECT * FROM planos WHERE id = ?').get(id);
   }
 
+  buscarPorTitulo(titulo) {
+    return db.prepare('SELECT * FROM planos WHERE LOWER(titulo) = LOWER(?)').get(titulo);
+  }
+
   buscarPorProfessor(professorId) {
     return db
       .prepare(

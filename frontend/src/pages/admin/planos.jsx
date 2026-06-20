@@ -18,6 +18,7 @@ const formVazio = {
 
 function PlanoModal({ inicial, onSalvar, onFechar }) {
   const [form, setForm] = useState(inicial);
+  const [salvando, setSalvando] = useState(false);
 
   function toggle(campo) {
     setForm(f => ({ ...f, [campo]: !f[campo] }));
@@ -25,7 +26,13 @@ function PlanoModal({ inicial, onSalvar, onFechar }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await onSalvar(form);
+    if (salvando) return;
+    setSalvando(true);
+    try {
+      await onSalvar(form);
+    } finally {
+      setSalvando(false);
+    }
   }
 
   return (
@@ -116,14 +123,16 @@ function PlanoModal({ inicial, onSalvar, onFechar }) {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors"
+              disabled={salvando}
+              className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {inicial.id ? 'Salvar alterações' : 'Criar plano'}
+              {salvando ? 'Salvando...' : (inicial.id ? 'Salvar alterações' : 'Criar plano')}
             </button>
             <button
               type="button"
               onClick={onFechar}
-              className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+              disabled={salvando}
+              className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors disabled:opacity-60"
             >
               Cancelar
             </button>

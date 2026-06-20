@@ -100,11 +100,28 @@ CREATE TABLE IF NOT EXISTS laboratorios (
   FOREIGN KEY (id) REFERENCES materiais(id)
 );
 
+-- acesso_lab guarda tanto o log de acesso instantâneo (data_acesso) quanto as
+-- reservas de uso de laboratórios remotos (janela data_inicio..data_fim).
+-- Uma linha é uma reserva quando data_inicio/data_fim estão preenchidos.
 CREATE TABLE IF NOT EXISTS acesso_lab (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   data_acesso DATETIME DEFAULT CURRENT_TIMESTAMP,
   professor_id INTEGER NOT NULL,
   lab_id INTEGER NOT NULL,
+  data_inicio DATETIME,
+  data_fim DATETIME,
   FOREIGN KEY (professor_id) REFERENCES professores(id),
   FOREIGN KEY (lab_id) REFERENCES laboratorios(id)
+);
+
+-- uso_lab marca a OCUPAÇÃO AO VIVO de um laboratório remoto: enquanto o
+-- professor mantém o laboratório aberto (heartbeat renova expira_em), o lab
+-- fica "em uso". A PK em lab_id garante no máximo um uso ativo por laboratório.
+CREATE TABLE IF NOT EXISTS uso_lab (
+  lab_id INTEGER PRIMARY KEY,
+  professor_id INTEGER NOT NULL,
+  iniciado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  expira_em DATETIME NOT NULL,
+  FOREIGN KEY (lab_id) REFERENCES laboratorios(id),
+  FOREIGN KEY (professor_id) REFERENCES usuarios(id)
 );

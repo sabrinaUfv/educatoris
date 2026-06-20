@@ -32,6 +32,11 @@ exports.criarPlano = (req, res) => {
   if (!titulo || preco === undefined || preco < 0 || !nivel) {
     return res.status(400).json({ erro: 'Campos obrigatórios: titulo, preco, nivel.' });
   }
+
+  if (planoRepository.buscarPorTitulo(titulo)) {
+    return res.status(409).json({ erro: 'Já existe um plano com este título.' });
+  }
+
   const id = planoRepository.criar({ titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download });
   res.status(201).json({ mensagem: 'Plano criado com sucesso.', id });
 };
@@ -41,7 +46,14 @@ exports.atualizarPlano = (req, res) => {
   if (!titulo || preco === undefined || preco < 0 || !nivel) {
     return res.status(400).json({ erro: 'Campos obrigatórios: titulo, preco, nivel.' });
   }
-  planoRepository.atualizar(parseInt(req.params.id), { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download });
+
+  const id = parseInt(req.params.id);
+  const conflito = planoRepository.buscarPorTitulo(titulo);
+  if (conflito && conflito.id !== id) {
+    return res.status(409).json({ erro: 'Já existe outro plano com este título.' });
+  }
+
+  planoRepository.atualizar(id, { titulo, descricao, preco, nivel, acesso_video, acesso_lab_rem, acesso_lab_virt, acesso_cont_edit, acesso_cont_download });
   res.json({ mensagem: 'Plano atualizado com sucesso.' });
 };
 

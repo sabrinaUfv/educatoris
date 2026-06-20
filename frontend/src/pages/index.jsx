@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import NavBar from '../components/NavBar';
 import AbaAnos from '../components/AbaAnos';
 import BuscaBar from '../components/BuscaBar';
+import MinhasReservas from '../components/MinhasReservas';
 import { getConteudosPorAno, buscarTemas } from '../lib/api';
 
 export default function Home() {
@@ -50,6 +51,9 @@ export default function Home() {
         <div className="bg-white p-4 md:p-6 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 mb-8">
           <BuscaBar onBuscar={onBuscar} />
         </div>
+
+        {/* Reservas de laboratório do professor */}
+        <MinhasReservas />
 
         {/* Abas de Navegação */}
         {!buscando && (

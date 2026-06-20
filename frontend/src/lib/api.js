@@ -62,6 +62,61 @@ export async function acessarLaboratorio(id) {
   return (await req(`/materiais/laboratorio/${id}/acessar`)).json();
 }
 
+export async function disponibilidadeLaboratorio(id, instante) {
+  const qs = instante ? `?instante=${encodeURIComponent(instante)}` : '';
+  return (await req(`/materiais/laboratorio/${id}/disponibilidade${qs}`)).json();
+}
+
+export async function listarReservasLaboratorio(id) {
+  return (await req(`/materiais/laboratorio/${id}/reservas`)).json();
+}
+
+export async function reservarLaboratorio(id, inicio, fim) {
+  return (await req(`/materiais/laboratorio/${id}/reservar`, {
+    method: 'POST',
+    body: JSON.stringify({ inicio, fim }),
+  })).json();
+}
+
+export async function getMinhasReservas() {
+  return (await req('/materiais/minhas-reservas')).json();
+}
+
+export async function atualizarReserva(reservaId, inicio, fim) {
+  return (await req(`/materiais/reserva/${reservaId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ inicio, fim }),
+  })).json();
+}
+
+export async function cancelarReserva(reservaId) {
+  return (await req(`/materiais/reserva/${reservaId}`, { method: 'DELETE' })).json();
+}
+
+export async function iniciarUsoLaboratorio(id) {
+  return (await req(`/materiais/laboratorio/${id}/iniciar-uso`, { method: 'POST' })).json();
+}
+
+export async function manterUsoLaboratorio(id) {
+  return (await req(`/materiais/laboratorio/${id}/manter-uso`, { method: 'POST' })).json();
+}
+
+export async function encerrarUsoLaboratorio(id) {
+  return (await req(`/materiais/laboratorio/${id}/encerrar-uso`, { method: 'POST' })).json();
+}
+
+// Encerra o uso de forma confiável ao fechar a aba/navegar (não bloqueia o unload).
+export function encerrarUsoBeacon(id) {
+  if (typeof window === 'undefined') return;
+  const t = token();
+  // fetch com keepalive funciona com headers (Authorization), ao contrário do sendBeacon
+  fetch(`${BASE}/materiais/laboratorio/${id}/encerrar-uso`, {
+    method: 'POST',
+    keepalive: true,
+    headers: { ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+  }).catch(() => {});
+}
+
 export async function downloadPDF(idMaterial, titulo) {
   const t = token();
   const res = await fetch(`${BASE}/materiais/${idMaterial}/download`, {
