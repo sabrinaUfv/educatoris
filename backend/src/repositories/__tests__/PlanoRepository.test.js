@@ -34,6 +34,17 @@ describe('PlanoRepository', () => {
     expect(resultado).toEqual(mockPlano);
   });
 
+  test('buscarPorTitulo deve consultar plano por título (case-insensitive)', () => {
+    const mockPlano = { id: 1, titulo: 'Básico' };
+    const mockGet = jest.fn().mockReturnValue(mockPlano);
+    db.prepare.mockReturnValue({ get: mockGet });
+
+    const resultado = planoRepository.buscarPorTitulo('básico');
+
+    expect(resultado).toEqual(mockPlano);
+    expect(mockGet).toHaveBeenCalledWith('básico');
+  });
+
   test('criar deve inserir novo plano', () => {
     db.prepare.mockReturnValue({
       run: jest.fn().mockReturnValue({ lastInsertRowid: 5 }),
