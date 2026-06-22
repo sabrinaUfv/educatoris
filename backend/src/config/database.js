@@ -31,10 +31,13 @@ const adminExiste = db
 if (!adminExiste) {
   const senha = bcrypt.hashSync('admin123', 10);
   const resultado = db
-    .prepare("INSERT INTO usuarios (nome, email, senha, tipo, status_ativo) VALUES ('Administrador', 'admin@educatoris.com', ?, 'administrador', 1)")
-    .run(senha);
-  db.prepare('INSERT INTO administradores (id, admin_acesso) VALUES (?, 1)').run(resultado.lastInsertRowid);
-  console.log('[e-ducatoris] Admin padrão criado: admin@educatoris.com / admin123');
+  .prepare("INSERT OR IGNORE INTO usuarios (nome, email, senha, tipo, status_ativo) VALUES ('Administrador', 'admin@educatoris.com', ?, 'administrador', 1)")
+  .run(senha);
+
+  if (resultado.changes > 0) {
+    db.prepare('INSERT INTO administradores (id, admin_acesso) VALUES (?, 1)').run(resultado.lastInsertRowid);
+    console.log('[e-ducatoris] Admin padrão criado: admin@educatoris.com / admin123');
+  }
 }
 
 module.exports = db;
