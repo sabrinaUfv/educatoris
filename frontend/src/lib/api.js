@@ -16,8 +16,11 @@ async function req(path, options = {}) {
   });
 
   if (!res.ok) {
-    // CORREÇÃO: Intercepta o 401 e 403 e expulsa o usuário na hora
-    if (res.status === 401 || res.status === 403) {
+    // 401 = não autenticado (token ausente/inválido/expirado ou sessão encerrada):
+    // aí sim faz sentido limpar a sessão e mandar pro login.
+    // 403 = autenticado, mas sem permissão para a ação (regra de negócio, ex.:
+    // "apenas professores podem usar labs remotos"). NÃO deslogar: só propagar o erro.
+    if (res.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.clear(); // Limpa os dados
         window.location.href = '/login'; // Força o redirecionamento imediato
@@ -197,6 +200,10 @@ export async function atualizarPlano(id, dados) {
 
 export async function deletarPlano(id) {
   return (await req(`/admin/planos/${id}`, { method: 'DELETE' })).json();
+}
+
+export async function reativarPlano(id) {
+  return (await req(`/admin/planos/${id}/reativar`, { method: 'PATCH' })).json();
 }
 
 export async function atualizarPrecoPlano(id, preco) {

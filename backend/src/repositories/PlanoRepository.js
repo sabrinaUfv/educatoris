@@ -74,6 +74,10 @@ class PlanoRepository {
   deletar(id) {
     db.prepare('UPDATE planos SET ativo = 0 WHERE id = ?').run(id);
   }
+
+  reativar(id) {
+    db.prepare('UPDATE planos SET ativo = 1 WHERE id = ?').run(id);
+  }
 }
 
 module.exports = new PlanoRepository();

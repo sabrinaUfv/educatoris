@@ -11,6 +11,7 @@ router.get('/planos', ctrl.listarPlanosAdmin);
 router.post('/planos', ctrl.criarPlano);
 router.put('/planos/:id', ctrl.atualizarPlano);
 router.delete('/planos/:id', ctrl.deletarPlano);
+router.patch('/planos/:id/reativar', ctrl.reativarPlano);
 router.get('/conteudos', ctrl.listarConteudos);
 router.post('/conteudos', ctrl.adicionarConteudo);
 router.delete('/conteudos/:id', ctrl.inativarConteudo);

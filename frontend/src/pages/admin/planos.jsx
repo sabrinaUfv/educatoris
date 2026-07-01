@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-import { getAdminPlanos, criarPlano, atualizarPlano, deletarPlano } from '../../lib/api';
+import { getAdminPlanos, criarPlano, atualizarPlano, deletarPlano, reativarPlano } from '../../lib/api';
 
 const PERMISSOES = [
   { campo: 'acesso_video',         label: 'Videoaulas'        },
@@ -191,6 +191,16 @@ export default function AdminPlanos() {
     }
   }
 
+  async function handleReativar(id) {
+    try {
+      await reativarPlano(id);
+      notificar('Plano reativado.');
+      recarregar();
+    } catch (e) {
+      notificar(e.message, 'erro');
+    }
+  }
+
   function abrirEdicao(p) {
     setModal({
       id: p.id, titulo: p.titulo, descricao: p.descricao || '',
@@ -319,12 +329,20 @@ export default function AdminPlanos() {
                     <td className="p-4">{p.nivel}</td>
                     <td className="p-4">R$ {Number(p.preco).toFixed(2)}</td>
                     <td className="p-4 text-center">
-                      <button
-                        onClick={() => abrirEdicao(p)}
-                        className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-                      >
-                        Reativar / Editar
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleReativar(p.id)}
+                          className="px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+                        >
+                          Reativar
+                        </button>
+                        <button
+                          onClick={() => abrirEdicao(p)}
+                          className="px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                        >
+                          Editar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

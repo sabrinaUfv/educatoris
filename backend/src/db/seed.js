@@ -59,7 +59,7 @@ function seed() {
     db.prepare('INSERT INTO videoaulas (id, narrado, demonstrativo) VALUES (?, 1, 0)').run(m2);
 
     const m3 = db.prepare(
-      "INSERT INTO materiais (conteudo_id, titulo, descricao, url, tipo) VALUES (?, 'Lab Virtual: Movimento de Projéteis', 'Simulação PhET - queda livre e lançamento', 'https://phet.colorado.edu/pt_BR/simulation/projectile-motion', 'laboratorio')"
+      "INSERT INTO materiais (conteudo_id, titulo, descricao, url, tipo) VALUES (?, 'Lab Virtual: Movimento de Projéteis', 'Simulação PhET - queda livre e lançamento', 'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_all.html?locale=pt_BR', 'laboratorio')"
     ).run(c1).lastInsertRowid;
     db.prepare('INSERT INTO laboratorios (id, remoto) VALUES (?, 0)').run(m3);
 

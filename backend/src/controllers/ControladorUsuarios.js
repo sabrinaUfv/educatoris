@@ -62,6 +62,15 @@ exports.deletarPlano = (req, res) => {
   res.json({ mensagem: 'Plano desativado com sucesso.' });
 };
 
+exports.reativarPlano = (req, res) => {
+  const id = parseInt(req.params.id);
+  const plano = planoRepository.buscarPorId(id);
+  if (!plano) return res.status(404).json({ erro: 'Plano não encontrado.' });
+
+  planoRepository.reativar(id);
+  res.json({ mensagem: 'Plano reativado com sucesso.' });
+};
+
 exports.adicionarConteudo = (req, res) => {
   const { titulo, anoEscolar, tema } = req.body;
   if (!titulo || !anoEscolar || !tema) return res.status(400).json({ erro: 'Campos obrigatórios: titulo, anoEscolar, tema.' });

@@ -73,27 +73,48 @@ export default function LabSessionModal({ material, url, onEncerrar, onExpirar }
           </div>
         </div>
 
-        {/* Corpo: iframe do laboratório com fallback */}
-        <div className="flex-1 bg-slate-100 min-h-[60vh] relative">
-          {iframeOk ? (
-            <iframe
-              src={url}
-              title={material.titulo}
-              className="w-full h-full min-h-[60vh] border-0"
-              onError={() => setIframeOk(false)}
-              allow="fullscreen"
-            />
-          ) : null}
-
-          {/* Fallback caso o laboratório bloqueie incorporação em iframe */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 border border-slate-200 rounded-xl px-4 py-2 shadow-sm text-center">
-            <p className="text-xs text-slate-500">
-              O laboratório não carregou aqui?{' '}
-              <a href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-bold underline">
-                Abrir em nova aba
+        {/* Corpo: labs remotos não permitem incorporação em iframe (X-Frame-Options),
+            então abrimos direto em nova aba; labs virtuais rodam embutidos. */}
+        <div className="flex-1 bg-slate-100 min-h-[60vh] relative flex items-center justify-center">
+          {material.remoto ? (
+            <div className="text-center max-w-md px-6 py-10">
+              <p className="font-bold text-slate-800 mb-1">Laboratório remoto</p>
+              <p className="text-sm text-slate-500 mb-6">
+                Este experimento roda no equipamento real do provedor e abre em uma nova aba.
+                A reserva continua ativa enquanto esta janela estiver aberta.
+              </p>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition-colors"
+              >
+                Abrir laboratório em nova aba
               </a>
-            </p>
-          </div>
+            </div>
+          ) : (
+            <>
+              {iframeOk ? (
+                <iframe
+                  src={url}
+                  title={material.titulo}
+                  className="w-full h-full min-h-[60vh] border-0"
+                  onError={() => setIframeOk(false)}
+                  allow="fullscreen"
+                />
+              ) : null}
+
+              {/* Fallback caso o laboratório bloqueie incorporação em iframe */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 border border-slate-200 rounded-xl px-4 py-2 shadow-sm text-center">
+                <p className="text-xs text-slate-500">
+                  O laboratório não carregou aqui?{' '}
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-bold underline">
+                    Abrir em nova aba
+                  </a>
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="p-3 border-t border-slate-200 bg-amber-50">
